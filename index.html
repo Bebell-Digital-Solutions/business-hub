@@ -1,0 +1,994 @@
+
+<!DOCTYPE html>
+<html lang="en" x-data="appState" :class="currentTheme === 'dark' ? 'dark' : (currentTheme !== 'light' ? `theme-${currentTheme}` : '')">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Business Hub</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Alpine.js -->
+    <script src="//unpkg.com/alpinejs" defer></script>
+    
+    <style>
+/* Base Styles & CSS Custom Properties for Theming */
+:root {
+    /* Light Theme (Default) */
+    --theme-bg-primary: #f8f9fa; /* Tailwind gray-50 */
+    --theme-bg-secondary: #ffffff; /* White, e.g., for main content area background */
+    --theme-text-primary: #1f2937; /* Tailwind gray-800 */
+    --theme-text-secondary: #6b7280; /* Tailwind gray-500 */
+    --theme-border: #e5e7eb; /* Tailwind gray-200 */
+    --theme-sidebar-bg: #ffffff; /* White */
+    --theme-sidebar-text: #374151; /* Tailwind gray-700 */
+    --theme-sidebar-icon: #4b5563; /* Tailwind gray-600 */
+    --theme-active-item-bg: #FFF0F7; /* Tailwind pink-100 (using pink from config) */
+    --theme-active-item-text: #C1146E; /* Tailwind pink-700 */
+    --theme-hover: #f3f4f6; /* Tailwind gray-100 */
+    --theme-accent: #DF1783; /* Pink-600 */
+    --theme-accent-hover: #C1146E; /* Pink-700 */
+    --theme-input-bg: #ffffff;
+    --theme-modal-bg: #ffffff;
+    --theme-icon: #6b7280; /* Tailwind gray-500 */
+    --theme-resizer: transparent;
+    --theme-resizer-hover: rgba(223, 23, 131, 0.2); /* pink-600 with opacity */
+    --theme-chat-bubble-ai: #e5e7eb; /* Tailwind gray-200 */
+}
+
+html.dark {
+    --theme-bg-primary: #1a202c; /* Tailwind gray-900 like */
+    --theme-bg-secondary: #252c3b; /* Slightly lighter dark for main content */
+    --theme-text-primary: #e2e8f0; /* Tailwind slate-200 */
+    --theme-text-secondary: #94a3b8; /* Tailwind slate-400 */
+    --theme-border: #4a5568; /* Tailwind gray-600 */
+    --theme-sidebar-bg: #1f2937; /* Tailwind gray-800 */
+    --theme-sidebar-text: #d1d5db; /* Tailwind gray-300 */
+    --theme-sidebar-icon: #9ca3af; /* Tailwind gray-400 */
+    --theme-active-item-bg: #55072f; /* Darker pink */
+    --theme-active-item-text: #fda4af; /* Lighter pink text */
+    --theme-hover: #374151; /* Tailwind gray-700 */
+    --theme-accent: #EC4899; /* Pink-500 */
+    --theme-accent-hover: #DF1783; /* Pink-600 */
+    --theme-input-bg: #374151; /* Tailwind gray-700 */
+    --theme-modal-bg: #1f2937; /* Tailwind gray-800 */
+    --theme-icon: #9ca3af; /* Tailwind gray-400 */
+    --theme-resizer: transparent;
+    --theme-resizer-hover: rgba(236, 72, 153, 0.3); /* pink-500 with opacity */
+    --theme-chat-bubble-ai: #374151; /* Tailwind gray-700 */
+}
+
+html.theme-ocean {
+    --theme-bg-primary: #E0F7FA; /* Light cyan */
+    --theme-bg-secondary: #B2EBF2; /* Lighter cyan for main content */
+    --theme-text-primary: #004D40; /* Dark teal */
+    --theme-text-secondary: #00796B; /* Medium teal */
+    --theme-border: #75c8cc; 
+    --theme-sidebar-bg: #A7FFEB; /* Very Light teal/mint */
+    --theme-sidebar-text: #004D40;
+    --theme-sidebar-icon: #00695C;
+    --theme-active-item-bg: #00796B; 
+    --theme-active-item-text: #E0F7FA;
+    --theme-hover: #80CBC4; /* Lighter teal for hover */
+    --theme-accent: #009688; /* Teal */
+    --theme-accent-hover: #00796B; 
+    --theme-input-bg: #B2EBF2;
+    --theme-modal-bg: #E0F7FA;
+    --theme-icon: #00796B;
+    --theme-resizer-hover: rgba(0, 121, 107, 0.3); /* teal with opacity */
+    --theme-chat-bubble-ai: #A7FFEB;
+}
+
+html.theme-forest {
+    --theme-bg-primary: #E8F5E9; /* Light green */
+    --theme-bg-secondary: #C8E6C9; /* Lighter green */
+    --theme-text-primary: #1B5E20; /* Dark green */
+    --theme-text-secondary: #388E3C; /* Medium green */
+    --theme-border: #a5d6a7;
+    --theme-sidebar-bg: #A5D6A7; /* Light green for sidebar */
+    --theme-sidebar-text: #1B5E20;
+    --theme-sidebar-icon: #2E7D32;
+    --theme-active-item-bg: #388E3C; 
+    --theme-active-item-text: #E8F5E9;
+    --theme-hover: #81C784; /* Lighter green for hover */
+    --theme-accent: #4CAF50; /* Green */
+    --theme-accent-hover: #388E3C;
+    --theme-input-bg: #C8E6C9;
+    --theme-modal-bg: #E8F5E9;
+    --theme-icon: #388E3C;
+    --theme-resizer-hover: rgba(56, 142, 60, 0.3); /* green with opacity */
+    --theme-chat-bubble-ai: #A5D6A7;
+}
+
+html.theme-sunset {
+    --theme-bg-primary: #FFF3E0; /* Light orange */
+    --theme-bg-secondary: #FFE0B2; /* Lighter orange */
+    --theme-text-primary: #E65100; /* Dark orange */
+    --theme-text-secondary: #F57C00; /* Medium orange */
+    --theme-border: #ffcc80;
+    --theme-sidebar-bg: #FFCC80; /* Light orange for sidebar */
+    --theme-sidebar-text: #E65100;
+    --theme-sidebar-icon: #EF6C00;
+    --theme-active-item-bg: #F57C00; 
+    --theme-active-item-text: #FFF3E0;
+    --theme-hover: #FFB74D; /* Lighter orange for hover */
+    --theme-accent: #FF9800; /* Orange */
+    --theme-accent-hover: #F57C00;
+    --theme-input-bg: #FFE0B2;
+    --theme-modal-bg: #FFF3E0;
+    --theme-icon: #F57C00;
+    --theme-resizer-hover: rgba(245, 124, 0, 0.3); /* orange with opacity */
+    --theme-chat-bubble-ai: #FFCC80;
+}
+
+
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--theme-bg-primary);
+    color: var(--theme-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--theme-hover); 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--theme-text-secondary); 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--theme-text-primary);
+}
+
+
+/* Custom Image Widget */
+.custom-image-widget {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 1000; 
+}
+
+.custom-image {
+    width: 60px; 
+    height: auto;
+    transition: transform 0.2s ease-in-out;
+    border-radius: 4px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    background-color: var(--theme-sidebar-bg); /* Ensure contrast if image has transparency */
+}
+html.dark .custom-image {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.custom-image-widget:hover .custom-image {
+    transform: scale(1.05);
+}
+
+/* Sidebar Navigation Item Styling */
+.nav-item {
+    color: var(--theme-sidebar-text);
+}
+.nav-item:hover {
+    background-color: var(--theme-hover);
+    color: var(--theme-text-primary); /* Use primary text color on hover for better contrast */
+}
+.nav-item.active {
+    background-color: var(--theme-active-item-bg);
+    color: var(--theme-active-item-text);
+    font-weight: 600; /* semibold */
+}
+.nav-item.active i[data-lucide] { /* Ensure icon color matches text in active state */
+    color: var(--theme-active-item-text);
+}
+.nav-item:hover i[data-lucide] {
+    color: var(--theme-text-primary);
+}
+
+/* Sidebar Action Buttons (Settings, Tools, Help, etc.) */
+.sidebar-action-button {
+    /* Base styles are applied via Tailwind classes in HTML (p-2, text-theme-sidebar-icon, rounded-md) */
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+.sidebar-action-button:hover {
+    color: var(--theme-accent); /* Icon color changes to accent color */
+    background-color: var(--theme-hover); /* Subtle background change */
+}
+
+
+/* Sidebar Resizer */
+#sidebar-resizer {
+    background-color: var(--theme-resizer);
+    transition: background-color 0.2s ease;
+}
+#sidebar-resizer:hover {
+    background-color: var(--theme-resizer-hover);
+}
+
+/* Ensure iframe takes up available space within its container */
+#main-content > div { /* This is the direct parent of iframe and status indicator */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    position: relative; /* For absolute positioning of status indicator */
+}
+
+#content-iframe {
+    flex-grow: 1;
+    min-height: 0; 
+    border: none; 
+    background-color: var(--theme-bg-primary); /* Match parent background */
+}
+
+/* Back to Top button */
+#back-to-top {
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-text-secondary);
+    color: var(--theme-bg-primary);
+}
+#back-to-top:hover {
+    background-color: var(--theme-text-primary);
+}
+
+
+/* Alpine.js cloak */
+[x-cloak] { display: none !important; }
+
+/* Chat Modal Typing Indicator */
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    /* background-color defaults to theme-text-secondary via Tailwind class in HTML */
+    border-radius: 50%;
+    animation: typing 1s infinite ease-in-out;
+    display: inline-block;
+}
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+/* Mobile restriction overlay styles if JS adds a class to body */
+.mobile-restricted #sidebar,
+.mobile-restricted #main-content,
+.mobile-restricted .custom-image-widget,
+.mobile-restricted #back-to-top,
+.mobile-restricted button[title="Open Assistant"],
+.mobile-restricted #settings-modal-button, 
+.mobile-restricted .sidebar-action-button /* Hide new icons (they have this class now) */
+ {
+    display: none !important;
+}
+/* Fallback for the parent container of action icons if needed, though individual buttons should be caught */
+.mobile-restricted .mb-4.flex.justify-around.items-center { 
+    display: none !important;
+}
+
+
+#chat-messages::-webkit-scrollbar-track {
+    background: var(--theme-hover); 
+}
+#chat-messages::-webkit-scrollbar-thumb {
+    background: var(--theme-text-secondary);
+}
+#chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--theme-text-primary); 
+}
+
+/* Ensure placeholder text color is also themed */
+input::placeholder, textarea::placeholder {
+    color: var(--theme-text-secondary);
+    opacity: 0.7;
+}
+input:focus::placeholder, textarea:focus::placeholder {
+    opacity: 0.5;
+}
+
+/* Update border colors for inputs to use theme variables */
+input[type="text"], input[type="password"], textarea {
+    border-color: var(--theme-border);
+    background-color: var(--theme-input-bg);
+    color: var(--theme-text-primary);
+}
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+    border-color: var(--theme-accent); /* Use accent color for focus ring */
+    --tw-ring-color: var(--theme-accent); /* For Tailwind focus ring */
+}
+    </style>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enable class-based dark mode
+            theme: {
+                extend: {
+                    colors: {
+                        pink: {
+                            100: '#FFF0F7',
+                            500: '#EC4899',
+                            600: '#DF1783',
+                            700: '#C1146E'
+                        },
+                        purple: {
+                            600: '#8B5CF6'
+                        },
+                        dark: { 
+                            bg: '#1a202c', 
+                            card: '#2d3748', 
+                            text: '#e2e8f0', 
+                            border: '#4a5568', 
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        caveat: ['Caveat', 'cursive'],
+                    },
+                },
+            },
+        };
+    </script>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.5.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-theme-bg-primary font-inter text-theme-text-primary">
+
+    <!-- Mobile Access Restriction -->
+    <div id="mobile-restriction-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 text-white flex-col items-center justify-center p-8 text-center z-[100]" style="display: none;">
+        <i data-lucide="monitor-smartphone" class="w-24 h-24 mb-6 text-pink-500"></i>
+        <h2 class="text-3xl font-bold mb-4">Desktop Access Only</h2>
+        <p class="text-lg mb-2">The Ultimate Business Hub is optimized for desktop use.</p>
+        <p class="text-md">Please access this application on a larger screen for the best experience.</p>
+    </div>
+
+    <!-- El Negocio Digital Image Widget -->
+    <div class="custom-image-widget">
+        <a href="https://elnegocio-digital.translate.goog/?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en-US&_x_tr_pto=wapp" target="_blank" rel="noopener noreferrer">
+            <img class="custom-image" 
+                 src="https://bucket.mlcdn.com/a/3336/3336910/images/138f14304ea21715dfae64ae5fe1d71b08c2d451.png" 
+                 alt="El Negocio Digital"
+                 style="display: block;">
+        </a>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside
+            id="sidebar"
+            class="fixed left-0 top-0 h-full bg-theme-sidebar-bg border-r border-theme-border shadow-lg overflow-y-auto z-20 flex flex-col"
+            :style="`width: ${sidebarWidth}px`"
+            aria-label="Sidebar Navigation"
+        >
+            <div class="p-6 flex-shrink-0">
+                <!-- Logo and Header -->
+                <div class="mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                        <i data-lucide="layout-dashboard" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-theme-text-primary mb-1">Ultimate Business Hub</h1>
+                    <p class="text-theme-text-secondary text-xs">Your compass for success</p>
+                </div>
+
+                <!-- Sidebar Action Icons -->
+                <div class="mb-4 flex justify-around items-center">
+                    <button @click="openThemeSelectionModal = true" title="Theme Settings" class="sidebar-action-button p-2 text-theme-sidebar-icon rounded-md">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="openKnowledgeBaseModal = true" title="Knowledge Base" class="sidebar-action-button p-2 text-theme-sidebar-icon rounded-md">
+                        <i data-lucide="library" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="handleMenuItemClick('app-resources', 'https://example.com/app-resources')" title="Resources" class="sidebar-action-button p-2 text-theme-sidebar-icon rounded-md">
+                        <i data-lucide="book-open" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="openHelpModal = true" title="Help" class="sidebar-action-button p-2 text-theme-sidebar-icon rounded-md">
+                        <i data-lucide="help-circle" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="toggleTheme()" :title="currentTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'" class="sidebar-action-button p-2 text-theme-sidebar-icon rounded-md">
+                        <i x-show="currentTheme !== 'light'" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+                        <i x-show="currentTheme === 'light'" data-lucide="moon" class="w-5 h-5" x-cloak></i>
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="menu-search" placeholder="Search menu..." class="w-full px-3 py-2 pr-10 text-sm border border-theme-border rounded-lg focus:ring-pink-500 focus:border-pink-500 bg-theme-input-bg text-theme-text-primary" @input="filterMenu($event.target.value)">
+                        <i data-lucide="search" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-theme-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav id="navigation-menu" class="space-y-1 px-4 pb-6 flex-grow overflow-y-auto">
+                <!-- Menu items will be injected here -->
+            </nav>
+        </aside>
+
+        <!-- Sidebar Resize Handle -->
+        <div id="sidebar-resizer" class="fixed top-0 h-full w-2 cursor-col-resize z-20 bg-theme-resizer hover:bg-theme-resizer-hover" :style="`left: ${sidebarWidth - 1}px`"></div>
+
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-grow h-screen flex flex-col transition-all duration-300 ease-in-out bg-theme-bg-secondary" :style="`margin-left: ${sidebarWidth}px`">
+            <div class="flex-grow relative flex flex-col">
+                <div id="iframe-status-indicator" class="absolute inset-0 bg-theme-bg-primary bg-opacity-75 flex-col items-center justify-center z-10" style="display: none;">
+                    <div id="iframe-loader" class="flex flex-col items-center">
+                        <i data-lucide="loader-2" class="w-12 h-12 text-theme-accent animate-spin mb-4"></i>
+                        <p class="text-lg font-medium text-theme-text-primary">Loading content...</p>
+                    </div>
+                    <div id="iframe-error" class="flex flex-col items-center" style="display: none;">
+                        <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500 mb-4"></i>
+                        <p class="text-lg font-medium text-red-500">Failed to load content.</p>
+                        <p class="text-sm text-theme-text-secondary">The page might not exist or doesn't allow embedding.</p>
+                    </div>
+                </div>
+                <iframe id="content-iframe" src="about:blank" class="w-full h-full border-0 rounded-lg shadow-md bg-theme-bg-primary flex-grow" title="Content Display" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation allow-top-navigation-by-user-activation"></iframe>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button @click="openChat = true" title="Open Assistant" class="fixed bottom-20 right-6 bg-theme-accent hover:bg-theme-accent-hover text-white p-4 rounded-full shadow-xl transition-transform hover:scale-110 duration-200 z-50">
+        <i data-lucide="message-circle" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" title="Go to top" class="hidden fixed bottom-6 right-6 bg-gray-700 hover:bg-gray-900 text-white p-3 rounded-full shadow-lg transition-opacity duration-300 z-50">
+        <i data-lucide="arrow-up" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Theme Selection Modal -->
+    <div x-show="openThemeSelectionModal" @keydown.escape.window="openThemeSelectionModal = false" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4" x-cloak>
+        <div @click.outside="openThemeSelectionModal = false" class="bg-theme-modal-bg rounded-lg shadow-2xl w-full max-w-md">
+            <div class="flex items-center justify-between p-4 border-b border-theme-border">
+                <h3 class="text-lg font-semibold text-theme-text-primary flex items-center">
+                    <i data-lucide="palette" class="w-5 h-5 mr-2 text-theme-accent"></i> Select Theme
+                </h3>
+                <button @click="openThemeSelectionModal = false" class="text-theme-icon hover:text-theme-accent">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <template x-for="theme in themes" :key="theme.id">
+                        <button @click="selectTheme(theme.id)" 
+                                :class="{ 'ring-2 ring-offset-2 ring-theme-accent ring-offset-theme-modal-bg': currentTheme === theme.id }"
+                                class="p-3 border border-theme-border rounded-lg hover:border-theme-accent focus:outline-none transition-all duration-150">
+                            <div class="flex items-center mb-2">
+                                <span class="text-sm font-medium text-theme-text-primary" x-text="theme.name"></span>
+                            </div>
+                            <div class="flex space-x-1.5 h-6">
+                                <template x-for="color in theme.previewColors" :key="color">
+                                    <div class="w-1/3 h-full rounded" :style="`background-color: ${color}`"></div>
+                                </template>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+             <div class="p-4 border-t border-theme-border text-right">
+                <button @click="openThemeSelectionModal = false" class="px-4 py-2 text-sm bg-theme-accent hover:bg-theme-accent-hover text-white rounded-md transition-colors">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div x-show="openHelpModal" @keydown.escape.window="openHelpModal = false" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4" x-cloak>
+        <div @click.outside="openHelpModal = false" class="bg-theme-modal-bg rounded-lg shadow-2xl w-full max-w-lg max-h-[70vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-theme-border">
+                <h3 class="text-lg font-semibold text-theme-text-primary flex items-center">
+                    <i data-lucide="help-circle" class="w-5 h-5 mr-2 text-theme-accent"></i> Help & Support
+                </h3>
+                <button @click="openHelpModal = false" class="text-theme-icon hover:text-theme-accent">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto">
+                <h4 class="text-md font-semibold text-theme-text-primary">Welcome to the Help Center!</h4>
+                <p class="text-sm text-theme-text-secondary">
+                    This is a placeholder for help content. You can find FAQs, tutorials, and contact information here.
+                </p>
+                <p class="text-sm text-theme-text-secondary">
+                    For specific issues, please refer to the documentation of individual tools or contact support.
+                </p>
+                <!-- Add more help content here -->
+            </div>
+             <div class="p-4 border-t border-theme-border text-right">
+                <button @click="openHelpModal = false" class="px-4 py-2 text-sm bg-theme-accent hover:bg-theme-accent-hover text-white rounded-md transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Knowledge Base Modal -->
+    <div x-show="openKnowledgeBaseModal" @keydown.escape.window="openKnowledgeBaseModal = false" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4" x-cloak>
+        <div @click.outside="openKnowledgeBaseModal = false" class="bg-theme-modal-bg rounded-lg shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-theme-border">
+                <h3 class="text-lg font-semibold text-theme-text-primary flex items-center">
+                    <i data-lucide="library" class="w-5 h-5 mr-2 text-theme-accent"></i> Knowledge Base
+                </h3>
+                <button @click="openKnowledgeBaseModal = false" class="text-theme-icon hover:text-theme-accent">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-grow p-1 overflow-hidden">
+                <iframe src="https://example.com/knowledge-base" class="w-full h-full border-0 rounded-b-md" title="Knowledge Base Content"></iframe>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Chat Modal -->
+    <div x-show="openChat" @keydown.escape.window="openChat = false" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" x-cloak>
+        <div @click.outside="openChat = false" class="bg-theme-modal-bg rounded-lg shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between p-4 border-b border-theme-border">
+                <h3 class="text-lg font-semibold text-theme-text-primary flex items-center">
+                    <i data-lucide="bot" class="w-5 h-5 mr-2 text-theme-accent"></i> AI Assistant
+                </h3>
+                <button @click="openChat = false" class="text-theme-icon hover:text-theme-accent">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- API Key Settings & Chat Area -->
+            <div class="flex-grow p-4 overflow-y-auto space-y-4">
+                <!-- API Key Section -->
+                <div x-show="!geminiApiKey" class="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md">
+                    <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-2 font-medium">
+                        <i data-lucide="key-round" class="inline w-4 h-4 mr-1"></i> Gemini API Key Required
+                    </p>
+                    <input type="password" x-model="apiKeyInput" placeholder="Enter your Gemini API Key" class="w-full px-3 py-2 text-sm border border-theme-border rounded-md focus:ring-pink-500 focus:border-pink-500 bg-theme-input-bg text-theme-text-primary">
+                    <button @click="saveGeminiApiKey()" class="mt-2 w-full bg-theme-accent hover:bg-theme-accent-hover text-white text-sm py-2 px-3 rounded-md transition-colors">
+                        Save Key
+                    </button>
+                     <p class="text-xs text-theme-text-secondary mt-2">Your API key is stored locally in your browser and not sent to our servers.</p>
+                </div>
+                 <div x-show="geminiApiKey && !chatSessionInitialized && chatMessages.length === 0" class="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-md">
+                    <p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium flex items-center">
+                        <i data-lucide="loader-2" class="inline w-4 h-4 mr-2 animate-spin"></i> Initializing AI...
+                    </p>
+                 </div>
+                 <div x-show="geminiApiKey && chatSessionInitialized" class="p-3 bg-green-500/10 border border-green-500/30 rounded-md">
+                    <p class="text-sm text-green-700 dark:text-green-300 font-medium">
+                        <i data-lucide="check-circle" class="inline w-4 h-4 mr-1"></i> Gemini API Key is set. Ready to chat!
+                    </p>
+                    <button @click="clearGeminiApiKey()" class="mt-2 text-xs text-theme-accent hover:text-theme-accent-hover">
+                        Clear API Key
+                    </button>
+                </div>
+
+
+                <!-- Chat Messages -->
+                <div id="chat-messages" class="space-y-3 h-64 overflow-y-auto pr-2">
+                     <template x-for="message in chatMessages" :key="message.id">
+                        <div class="flex" :class="message.sender === 'user' ? 'justify-end' : 'justify-start'">
+                            <div class="max-w-[70%] p-3 rounded-lg text-sm" 
+                                 :class="message.sender === 'user' ? 'bg-theme-accent text-white' : 'bg-theme-chat-bubble-ai text-theme-text-primary'">
+                                <p style="white-space: pre-wrap;" x-text="message.text"></p>
+                            </div>
+                        </div>
+                    </template>
+                    <div x-show="isAiTyping" class="flex justify-start">
+                         <div class="max-w-[70%] p-3 rounded-lg text-sm bg-theme-chat-bubble-ai text-theme-text-primary">
+                            <div class="flex items-center space-x-1">
+                                <span class="typing-dot bg-theme-text-secondary"></span>
+                                <span class="typing-dot bg-theme-text-secondary" style="animation-delay: 0.2s;"></span>
+                                <span class="typing-dot bg-theme-text-secondary" style="animation-delay: 0.4s;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-theme-border">
+                <div class="flex items-center space-x-2">
+                    <input type="text" x-model="chatInput" @keydown.enter="sendChatMessage()" placeholder="Type your message..." :disabled="!geminiApiKey || isAiTyping || !chatSessionInitialized" class="flex-grow px-3 py-2 text-sm border border-theme-border rounded-md focus:ring-pink-500 focus:border-pink-500 bg-theme-input-bg text-theme-text-primary disabled:opacity-50">
+                    <button @click="sendChatMessage()" :disabled="!geminiApiKey || isAiTyping || chatInput.trim() === '' || !chatSessionInitialized" class="bg-theme-accent hover:bg-theme-accent-hover text-white p-2.5 rounded-md transition-colors disabled:opacity-50">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import { GoogleGenAI } from "https://esm.sh/@google/genai@^1.5.1";
+
+const menuItems = [
+    { id: 'start-here', text: 'Start Here / Organization Hub', icon: 'home', url: 'https://example.com/start-here' },
+    { id: 'market-research', text: 'Market Research Hub', icon: 'search-check', url: 'https://example.com/market-research' },
+    { id: 'financial-hub', text: 'Financial Hub', icon: 'dollar-sign', url: 'https://example.com/financial-hub' },
+    { id: 'commercial-identity', text: 'Comercial Identity Hub', icon: 'award', url: 'https://example.com/commercial-identity' },
+    { id: 'privacy-precaution', text: 'Privacy & Precaution Hub', icon: 'shield-check', url: 'https://example.com/privacy-precaution' },
+    { id: 'protection-compliance', text: 'Protection & Compliance Hub', icon: 'scale', url: 'https://example.com/protection-compliance' },
+    { id: 'digital-wallet', text: 'Digital Wallet Hub', icon: 'wallet-2', url: 'https://example.com/digital-wallet' },
+    { id: 'digital-marketing', text: 'Digital Marketing Hub', icon: 'megaphone', url: 'https://example.com/digital-marketing' },
+    { id: 'sales-hub', text: 'Sales Hub', icon: 'shopping-cart', url: 'https://example.com/sales-hub' },
+    { id: 'web-development', text: 'Web development Hub', icon: 'code-2', url: 'https://example.com/web-development' },
+    { id: 'communication-hub', text: 'Communication Hub', icon: 'message-circle', url: 'https://example.com/communication-hub' },
+    { id: 'customer-service', text: 'Customer Service Hub', icon: 'users-2', url: 'https://example.com/customer-service' },
+    { id: 'content-creation', text: 'Content Creation Hub', icon: 'edit-3', url: 'https://example.com/content-creation' },
+    { id: 'data-analytics', text: 'Data & Analytics Hub', icon: 'bar-chart-3', url: 'https://example.com/data-analytics' },
+    { id: 'automations-hub', text: 'Automations Hub', icon: 'zap', url: 'https://example.com/automations-hub' },
+    { id: 'optimization-hub', text: 'Optimization Hub', icon: 'trending-up', url: 'https://example.com/optimization-hub' },
+    { id: 'formalization-hub', text: 'Formalization Hub', icon: 'briefcase', url: 'https://example.com/formalization-hub' },
+    { id: 'accounting-hub', text: 'Accounting Hub', icon: 'book-open-check', url: 'https://example.com/accounting-hub' },
+    { id: 'investment-hub', text: 'Investment Hub', icon: 'activity', url: 'https://example.com/investment-hub' },
+];
+
+const navigationMenuElement = document.getElementById('navigation-menu');
+const contentIframeElement = document.getElementById('content-iframe');
+const iframeStatusIndicator = document.getElementById('iframe-status-indicator');
+const iframeLoader = document.getElementById('iframe-loader');
+const iframeError = document.getElementById('iframe-error');
+
+let currentActiveItemId = null;
+let genAI = null;
+let chat = null;
+
+// --- Alpine.js State ---
+document.addEventListener('alpine:init', () => {
+    Alpine.data('appState', () => ({
+        // Sidebar State
+        sidebarWidth: parseInt(localStorage.getItem('sidebarWidth') || '320'),
+
+        // Theme State
+        currentTheme: localStorage.getItem('theme') || 'light',
+        openThemeSelectionModal: false, // Renamed from openSettingsModal
+        themes: [
+            { id: 'light', name: 'Light', previewColors: ['#f8f9fa', '#ffffff', '#DF1783'] },
+            { id: 'dark', name: 'Dark', previewColors: ['#1a202c', '#1f2937', '#EC4899'] },
+            { id: 'ocean', name: 'Ocean Blue', previewColors: ['#E0F7FA', '#A7FFEB', '#009688'] },
+            { id: 'forest', name: 'Forest Green', previewColors: ['#E8F5E9', '#A5D6A7', '#4CAF50'] },
+            { id: 'sunset', name: 'Sunset Orange', previewColors: ['#FFF3E0', '#FFCC80', '#FF9800'] },
+        ],
+        
+        // Chat State
+        openChat: false,
+        geminiApiKey: localStorage.getItem('geminiApiKey'),
+        apiKeyInput: '',
+        chatInput: '',
+        chatMessages: [],
+        isAiTyping: false,
+        chatSessionInitialized: false,
+
+        // New Modal States
+        openHelpModal: false,
+        openKnowledgeBaseModal: false,
+
+        init() {
+            this.applyTheme(this.currentTheme); 
+            if (this.geminiApiKey) this.initializeGenAiAndChat();
+            
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) mainContent.style.marginLeft = `${this.sidebarWidth}px`;
+        },
+
+        // --- Theme Methods ---
+        applyTheme(themeId) {
+            const htmlElement = document.documentElement;
+            this.themes.forEach(t => htmlElement.classList.remove(`theme-${t.id}`));
+            htmlElement.classList.remove('dark', 'light'); // Remove base light/dark specifically
+
+            if (themeId === 'dark') {
+                htmlElement.classList.add('dark');
+            } else if (themeId === 'light') {
+                 htmlElement.classList.add('light'); // Explicitly add light for clarity if needed by other logic
+            } else {
+                htmlElement.classList.add(`theme-${themeId}`);
+            }
+            
+            localStorage.setItem('theme', themeId);
+            this.currentTheme = themeId;
+            if (window.lucide) window.lucide.createIcons();
+        },
+        selectTheme(themeId) { // Called from the theme modal
+            this.applyTheme(themeId);
+            this.openThemeSelectionModal = false; 
+        },
+        toggleTheme() { // Called by the theme toggle icon in the sidebar
+            if (this.currentTheme === 'light') {
+                this.applyTheme('dark');
+            } else { // If dark or any colorful theme, switch to light
+                this.applyTheme('light');
+            }
+        },
+
+        // --- Menu Filter ---
+        filterMenu(searchTerm) {
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            menuItems.forEach(item => {
+                const isVisible = item.text.toLowerCase().includes(lowerSearchTerm);
+                if (item.element) {
+                    item.element.style.display = isVisible ? 'flex' : 'none';
+                }
+            });
+        },
+
+        // --- Chat Methods ---
+        saveGeminiApiKey() {
+            if (this.apiKeyInput.trim()) {
+                this.geminiApiKey = this.apiKeyInput.trim();
+                localStorage.setItem('geminiApiKey', this.geminiApiKey);
+                this.apiKeyInput = '';
+                this.initializeGenAiAndChat();
+            }
+        },
+        clearGeminiApiKey() {
+            this.geminiApiKey = null;
+            localStorage.removeItem('geminiApiKey');
+            genAI = null;
+            chat = null;
+            this.chatSessionInitialized = false;
+            this.chatMessages = []; 
+        },
+        initializeGenAiAndChat() {
+            if (this.geminiApiKey) {
+                try {
+                    genAI = new GoogleGenAI({ apiKey: this.geminiApiKey });
+                    chat = genAI.chats.create({ model: 'gemini-2.5-flash-preview-04-17' });
+                    this.chatSessionInitialized = true;
+                     if (this.chatMessages.length === 0) { 
+                        this.chatMessages.push({ id: Date.now().toString(), sender: 'ai', text: "Hello! How can I assist you today?" });
+                    }
+                } catch (error) {
+                    console.error("Failed to initialize Gemini AI:", error);
+                    this.chatMessages.push({ id: Date.now().toString(), sender: 'ai', text: "Error: Could not initialize AI. Please check API key/console." });
+                    this.geminiApiKey = null; 
+                    localStorage.removeItem('geminiApiKey');
+                    this.chatSessionInitialized = false;
+                }
+            }
+        },
+        async sendChatMessage() {
+            if (!this.chatInput.trim() || !chat || !this.geminiApiKey || !this.chatSessionInitialized) return;
+
+            const userMessage = this.chatInput.trim();
+            this.chatMessages.push({ id: Date.now().toString(), sender: 'user', text: userMessage });
+            this.chatInput = '';
+            this.isAiTyping = true;
+            
+            const chatMessagesDiv = document.getElementById('chat-messages');
+            if (chatMessagesDiv) setTimeout(() => chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight, 0);
+
+            try {
+                const response = await chat.sendMessage({ message: userMessage });
+                this.chatMessages.push({ id: (Date.now() + 1).toString(), sender: 'ai', text: response.text });
+            } catch (error) {
+                console.error('Gemini API error:', error);
+                let errorMessage = "Sorry, I encountered an error.";
+                if (error instanceof Error) {
+                    if (error.message.toLowerCase().includes('api key not valid') || error.message.toLowerCase().includes('invalid api key')) {
+                        errorMessage = "Error: API key invalid. Please check and save again.";
+                        this.clearGeminiApiKey(); 
+                    } else {
+                         errorMessage = `Error: ${error.message}`;
+                    }
+                }
+                this.chatMessages.push({ id: (Date.now() + 1).toString(), sender: 'ai', text: errorMessage });
+            } finally {
+                this.isAiTyping = false;
+                if (chatMessagesDiv) setTimeout(() => chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight, 0);
+            }
+        }
+    }));
+});
+
+
+// --- Sidebar and Menu Logic (Global Scope) ---
+function setActiveMenuItem(itemId) {
+    if (currentActiveItemId) {
+        const previousActiveElement = document.getElementById(`menu-item-${currentActiveItemId}`);
+        if (previousActiveElement) {
+            previousActiveElement.classList.remove('active');
+        }
+    }
+    const newActiveElement = document.getElementById(`menu-item-${itemId}`);
+    if (newActiveElement) {
+        newActiveElement.classList.add('active');
+    }
+    currentActiveItemId = itemId;
+}
+
+function showIframeLoading() {
+    if (iframeStatusIndicator && iframeLoader && iframeError) {
+        iframeStatusIndicator.style.display = 'flex';
+        iframeLoader.style.display = 'flex';
+        iframeError.style.display = 'none';
+        if (contentIframeElement) contentIframeElement.style.visibility = 'hidden';
+    }
+}
+
+function showIframeError() {
+    if (iframeStatusIndicator && iframeLoader && iframeError) {
+        iframeStatusIndicator.style.display = 'flex';
+        iframeLoader.style.display = 'none';
+        iframeError.style.display = 'flex';
+        if (contentIframeElement) contentIframeElement.style.visibility = 'hidden';
+    }
+}
+
+function hideIframeStatus() {
+    if (iframeStatusIndicator) {
+        iframeStatusIndicator.style.display = 'none';
+    }
+    if (contentIframeElement) contentIframeElement.style.visibility = 'visible';
+}
+
+window.handleMenuItemClick = function(itemId, url) {
+    if (contentIframeElement) {
+        showIframeLoading();
+        const loadTimeout = setTimeout(() => {
+            if (iframeLoader && iframeLoader.style.display === 'flex') {
+                showIframeError();
+                 console.warn(`Iframe for ${url} timed out.`);
+            }
+        }, 10000); 
+
+        contentIframeElement.onload = () => {
+            clearTimeout(loadTimeout);
+            hideIframeStatus();
+        };
+        contentIframeElement.onerror = () => {
+            clearTimeout(loadTimeout);
+            showIframeError();
+        };
+        contentIframeElement.src = url;
+    }
+    setActiveMenuItem(itemId);
+}
+
+function renderMenu() {
+    if (!navigationMenuElement) return;
+    navigationMenuElement.innerHTML = ''; 
+
+    menuItems.forEach(item => {
+        const linkElement = document.createElement('a');
+        linkElement.href = '#';
+        linkElement.id = `menu-item-${item.id}`;
+        linkElement.className = 'nav-item flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors duration-200';
+        linkElement.setAttribute('role', 'menuitem');
+        linkElement.setAttribute('aria-label', item.text);
+        
+        linkElement.innerHTML = `
+            <i data-lucide="${item.icon}" class="w-4 h-4 mr-3 flex-shrink-0" aria-hidden="true"></i>
+            <span class="flex-grow truncate">${item.text}</span>
+            <i data-lucide="chevron-right" class="w-4 h-4 opacity-50 ml-2 flex-shrink-0" aria-hidden="true"></i>
+        `;
+
+        linkElement.onclick = (e) => {
+            e.preventDefault();
+            window.handleMenuItemClick(item.id, item.url);
+        };
+        navigationMenuElement.appendChild(linkElement);
+        item.element = linkElement; 
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+}
+
+// --- Back to Top Button Logic ---
+const backToTopButton = document.getElementById('back-to-top');
+if (backToTopButton) {
+    window.onscroll = () => {
+        if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+            backToTopButton.style.display = 'flex';
+        } else {
+            backToTopButton.style.display = 'none';
+        }
+    };
+    backToTopButton.onclick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+}
+
+// --- Sidebar Resizing Logic ---
+const sidebar = document.getElementById('sidebar');
+const resizer = document.getElementById('sidebar-resizer');
+const mainContent = document.getElementById('main-content');
+
+if (sidebar && resizer && mainContent) {
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        e.preventDefault(); 
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        let newWidth = e.clientX; 
+        const minWidth = 220; 
+        const maxWidth = 600; 
+        
+        if (newWidth < minWidth) newWidth = minWidth;
+        if (newWidth > maxWidth) newWidth = maxWidth;
+
+        const alpineDataInstance = document.querySelector('[x-data="appState"]').__x;
+        if (alpineDataInstance) {
+           alpineDataInstance.sidebarWidth = newWidth; 
+        } else { 
+            sidebar.style.width = `${newWidth}px`;
+        }
+        mainContent.style.marginLeft = `${newWidth}px`;
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = 'default';
+            document.body.style.userSelect = 'auto';
+            const alpineDataInstance = document.querySelector('[x-data="appState"]').__x;
+            if (alpineDataInstance && typeof alpineDataInstance.sidebarWidth !== 'undefined') {
+                localStorage.setItem('sidebarWidth', alpineDataInstance.sidebarWidth.toString());
+            }
+        }
+    });
+}
+
+
+// --- Initial Load ---
+document.addEventListener('DOMContentLoaded', () => {
+    renderMenu();
+    if (menuItems.length > 0) {
+        window.handleMenuItemClick(menuItems[0].id, menuItems[0].url);
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+
+    const mobileOverlay = document.getElementById('mobile-restriction-overlay');
+    function checkMobileRestriction() {
+        if (window.innerWidth < 1024 && mobileOverlay) {
+            mobileOverlay.style.display = 'flex';
+            document.body.classList.add('mobile-restricted');
+        } else if (mobileOverlay) {
+            mobileOverlay.style.display = 'none';
+            document.body.classList.remove('mobile-restricted');
+        }
+    }
+    checkMobileRestriction();
+    window.addEventListener('resize', checkMobileRestriction);
+});
+    </script>
+    <script>
+      // Ensure Lucide icons are created after Alpine.js initializes and updates DOM
+      document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+      document.addEventListener('alpine:initialized', () => { lucide.createIcons(); });
+      document.addEventListener('alpine:updated', () => { lucide.createIcons(); });
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
